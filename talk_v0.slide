@@ -1,0 +1,137 @@
+Code Shapes
+Form Indicates Function
+
+Aidan Coyle
+UK Team
+acoyle@enova.com
+
+* Once Upon A Time...
+
+* Reading Code Matters
+
+In an environment where we build on top of years of existing development, the ability to read code matters.
+
+- CNUapp has ~500,000 lines of ruby code
+- loan.rb alone has 7000+ lines
+- 8b/Portfolio has ~290,000
+
+We don't actually read anything that large, we scan it.
+
+* Difference Stands Out
+
+When we're scanning such a large body of code we tend to notice and gloss over patterns.
+
+If we see code that doesn't follow a known pattern, it stands out to us as warranting investigation.
+
+Being too clever without taking into account the way the code looks "at a glance" can hurt maintainability.
+
+* Example: if err != nil
+
+ func DoSomething(id string) ([]byte, error) {
+  	conn, err := NewConnection()
+  	if err != nil {
+  		log.Println("Error: ", err.Error())
+  		return nil, err
+  	}
+  
+  	record, err := conn.GetRecord(id)
+  	if err != nil {
+  		log.Println("Error: ", err.Error())
+  		return nil, err
+  	}
+  
+  	data, err := Marshal(record)
+  	if err != nil {
+  		log.Println("Error: ", err.Error())
+  		return nil, err
+  	}
+  
+  	return data, nil
+  }
+
+* Example: if err != nil
+
+  func DoSomething(id string) ([]byte, error) {
+    	conn, err := NewConnection()
+        handleError(err)
+        record, err := conn.GetRecord(id)
+        handleError(err)  
+        data, err := Marshal(record)
+        handlerError(err)
+        return data, nil
+  }
+
+Does an experienced go developer scan this easily?
+
+* Example: Generating URLs
+
+  class Requester
+    include RequestHelpers
+    
+    def base_url
+      Config.myapi.base_url
+    end
+  
+    def get_loans
+      get("#{base_url}/loans")
+    end
+  
+    def get_payments
+      get("#{base_url}/payments")
+    end
+  
+    def get_accounts
+      get(URI::HTTP.build(host: URI(base_url).host, path: '/accounts').to_s)
+    end
+  end
+
+Why does `get_accounts` stick out?
+
+* Example: Worker Scopes
+
+  class MyWorker
+    def self.scope
+      MyModel.where(type: 'workable').
+        where(status: 'requires_work').
+        where(effective_date: Date.current)
+    end
+  
+    def self.generate
+      scope.pluck(:id).each { perform_async(id) }
+    end
+  
+    def perform
+      MyModel.find(id).do_work!
+    end
+  end
+
+* Example: Worker Scopes
+
+  class MyWorker
+    def self.model_ids
+      MyModel.where(type: 'workable').
+        where(status: 'requires_work').
+        where(effective_date: Date.current).
+        pluck(:id)
+    end
+  
+    def self.generate
+      model_ids.each { perform_async(id) }
+    end
+  
+    def perform
+      MyModel.find(id).do_work!
+    end
+  end
+
+Might there have been purpose to the design of `#scope`?
+
+* The Cost Of Clever
+
+Don't let your cleverness come at the cost of grokkable code
+
+Best practices for clever coding
+
+- Ensure that you understand a pattern before you break it.
+- Large scale refactoring is better than standing out.
+- When all else is equal observe the local custom.
