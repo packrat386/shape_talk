@@ -1,8 +1,8 @@
 Code Shapes
-Form Indicates Function
+Form Implies Function
 
 Aidan Coyle
-UK Team
+Jarvis Team
 acoyle@enova.com
 
 * Once Upon A Time...
@@ -62,6 +62,34 @@ Being too clever without taking into account the way the code looks "at a glance
   }
 
 Does an experienced go developer scan this easily?
+
+* Example: WithContext
+
+  func DoSomething(in Input) (Output, err) {
+          // ...
+  }
+  
+  func DoSomethingWithContext(ctx context.Context, in Input) (Output, err) {
+          // ...
+  }
+
+I don't even really need to read the docs to know what this does.
+
+* Example: WithContext
+
+  type Input struct {
+          // ...
+  
+          // Ctx bounds the execution of DoSomething. If it is nil,
+          // context.Background() is used
+          Ctx context.Context
+  }
+  
+  func DoSomething(in Input) (Output, err) {
+          // ...
+  }
+
+This does the same thing, but it requires me doing a lot more reading
 
 * Example: Generating URLs
 
